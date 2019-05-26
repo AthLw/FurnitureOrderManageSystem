@@ -1,0 +1,102 @@
+package com.liuwei.entity;
+
+import java.sql.Timestamp;
+
+/**
+ * @ClassName Order
+ * @Description TODO
+ * @Author AthLw
+ * @Date 2019/5/24 09:00
+ * @Version 1.0
+ **/
+public class Order {
+    private int orderID;
+    private Timestamp orderTime;
+    private int orderingClientID;
+    private int commodityID;
+    private int commodityNum;
+    private double transactionCost;
+    private boolean isRefund;
+
+    public Order(int orderID, Timestamp orderTime, int orderingClientID, int commodityID,
+                 int commodityNum, double transactionCost, boolean isRefund) {
+        this.orderID = orderID;
+        this.orderTime = orderTime;
+        this.orderingClientID = orderingClientID;
+        this.commodityID = commodityID;
+        this.commodityNum = commodityNum;
+        this.transactionCost = transactionCost;
+        this.isRefund = isRefund;
+    }
+
+    public Order(){}
+
+    public int getOrderID() {
+        return orderID;
+    }
+
+    public void setOrderID(int orderID) {
+        this.orderID = orderID;
+    }
+
+    public Timestamp getOrderTime() {
+        return orderTime;
+    }
+
+    public void setOrderTime(Timestamp orderTime) {
+        this.orderTime = orderTime;
+    }
+
+    public int getOrderingClientID() {
+        return orderingClientID;
+    }
+
+    public void setOrderingClientID(int orderingClientID) {
+        this.orderingClientID = orderingClientID;
+    }
+
+    public int getCommodityID() {
+        return commodityID;
+    }
+
+    public void setCommodityID(int commodityID) {
+        this.commodityID = commodityID;
+    }
+
+    public int getCommodityNum() {
+        return commodityNum;
+    }
+
+    public void setCommodityNum(int commodityNum) {
+        this.commodityNum = commodityNum;
+    }
+
+    public double getTransactionCost() {
+        return transactionCost;
+    }
+
+    public void setTransactionCost(double transactionCost) {
+        this.transactionCost = transactionCost;
+    }
+
+    public boolean isRefund() {
+        return isRefund;
+    }
+
+    public void setRefund(boolean refund) {
+        isRefund = refund;
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "orderID=" + orderID +
+                ", orderTime='" + orderTime + '\'' +
+                ", orderingClientID=" + orderingClientID +
+                ", commodityID=" + commodityID +
+                ", commodityNum=" + commodityNum +
+                ", transactionCost=" + transactionCost +
+                ", isRefund=" + isRefund +
+                '}';
+    }
+}
