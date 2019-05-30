@@ -1,6 +1,7 @@
 package com.liuwei.business;
 
 import com.liuwei.entity.Commodity;
+import com.liuwei.entity.CommodityInformation;
 import com.liuwei.entity.Merchant;
 import com.liuwei.interfaces.MerchantFunction;
 import com.liuwei.util.Connector;
@@ -20,7 +21,7 @@ import java.util.List;
  * @Version 1.0
  **/
 public class MerchantService implements MerchantFunction {
-    private Connection conn;
+    private static Connection conn;
     private PreparedStatement ps;
 
     public MerchantService(){
@@ -41,10 +42,29 @@ public class MerchantService implements MerchantFunction {
             }
             res.close();
         } catch (SQLException e) {
-            System.out.println("query merchant failed!");
+            System.out.println("queryCommodity merchant failed!");
             e.printStackTrace();
         }
         return resMerchant;
+    }
+
+    public int insertByName(String mname, String mloc){
+        String querySql = "select max(商户ID) from merchant";
+        int mid = -1;
+        try {
+            ps = conn.prepareStatement(querySql);
+            ResultSet resultSet = ps.executeQuery();
+            if(resultSet.next()){
+                mid = resultSet.getInt(1);
+            }
+            resultSet.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        mid++;
+        Merchant merchant = new Merchant(mid, mname, mloc, 0);
+        insert(merchant);
+        return mid;
     }
 
     public void insert(Merchant merchant){
@@ -56,6 +76,7 @@ public class MerchantService implements MerchantFunction {
             ps.setString(3, merchant.getMerchantLocation());
             ps.setDouble(4, merchant.getAllSales());
 
+            ps.executeUpdate();
             conn.commit();
             ps.close();
         } catch (SQLException e) {
@@ -83,7 +104,7 @@ public class MerchantService implements MerchantFunction {
     }
 
     @Override
-    public List<Commodity> browse(int merchantID) {
+    public List<Commodity> queryCommodity(int merchantID) {
         List<Commodity> list = new ArrayList<>();
         String selectStr = "select * from commodity where 所属商户=?";
         try {
@@ -103,22 +124,32 @@ public class MerchantService implements MerchantFunction {
             }
             res.close();
         } catch (SQLException e) {
-            System.out.println("query commodity failed");
+            System.out.println("queryCommodity commodity failed");
             e.printStackTrace();
         }
         return list;
     }
 
     @Override
-    public void insert(Commodity commodity) {
+    public void insert(CommodityInformation commodityInformation) {
+        int cID = 0;
+        String queryStr = "select max(商品ID) from commodity";
         String insertStr = "insert into commodity values(?,?,?,?,?)";
         try {
+            ps = conn.prepareStatement(queryStr);
+            ResultSet resultSet = ps.executeQuery();
+            if(resultSet.next()){
+                cID = resultSet.getInt(1);
+            }
+            resultSet.close();
+
+            cID++;
             ps = conn.prepareStatement(insertStr);
-            ps.setInt(1, commodity.getCommodityID());
-            ps.setString(2, commodity.getCommodityName());
-            ps.setInt(3, commodity.getBelongToMerchant());
-            ps.setString(4, commodity.getDescription());
-            ps.setDouble(5, commodity.getPrice());
+            ps.setInt(1, cID);
+            ps.setString(2, commodityInformation.getcName());
+            ps.setInt(3, commodityInformation.getBelongMerchant());
+            ps.setString(4, commodityInformation.getcDescription());
+            ps.setDouble(5, commodityInformation.getcPrice());
 
             ps.executeUpdate();
             conn.commit();

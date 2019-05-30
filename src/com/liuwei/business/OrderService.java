@@ -21,7 +21,7 @@ import java.util.List;
 public class OrderService implements OrderFunction {
     public static int ITEM_NUM_PER_PAGE = 20;
 
-    private Connection conn;
+    private static Connection conn;
     private PreparedStatement ps;
 
     public OrderService(){
@@ -137,6 +137,7 @@ public class OrderService implements OrderFunction {
 
     @Override
     public int statisticCommodity() {
+        //TODO
         int res = 0;
         String querySql = "select a.商品ID,max(a.s) from " +
                 "(select 商品ID,sum(交易金额) as s from orderlist " +

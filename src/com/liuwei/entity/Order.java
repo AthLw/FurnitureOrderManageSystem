@@ -99,4 +99,16 @@ public class Order {
                 ", isRefund=" + isRefund +
                 '}';
     }
+
+    public String[] toStringArray(){
+        String[] res = new String[7];
+        res[0] = String.valueOf(orderID);
+        res[1] = String.valueOf(orderTime);
+        res[2] = String.valueOf(orderingClientID);
+        res[3] = String.valueOf(transactionCost);
+        res[4] = String.valueOf(commodityID);
+        res[5] = String.valueOf(commodityNum);
+        res[6] = String.valueOf(isRefund);
+        return res;
+    }
 }

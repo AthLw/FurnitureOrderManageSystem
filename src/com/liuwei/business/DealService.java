@@ -1,6 +1,7 @@
 package com.liuwei.business;
 
 import com.liuwei.entity.Order;
+import com.liuwei.entity.OrderInformation;
 import com.liuwei.interfaces.DealFunction;
 import com.liuwei.util.Connector;
 import com.mysql.cj.protocol.Resultset;
@@ -17,39 +18,39 @@ import java.util.List;
  * @Version 1.0
  **/
 public class DealService implements DealFunction {
-    private Connection conn;
+    private static Connection conn;
     private PreparedStatement ps;
 
-    public DealService(){
+    {
         conn = Connector.getInstance();
     }
 
     @Override
-    public void bargain(int clientID, List<int[]> commoditylist) {
+    public void bargain(int clientID, List<OrderInformation> commoditylist) {
         String querySql = "select max(订单号) from orderlist";
         String insertSql = "insert into orderlist values(?,?,?,?,?,?,?)";
-        int orderNum = 0;
+        int orderID = 0;
         try {
             conn.setAutoCommit(false);
             ps = conn.prepareStatement(querySql);
             ResultSet res =  ps.executeQuery();
             if(res.next()){
-                orderNum = res.getInt(1);
-                System.out.println(orderNum);
+                orderID = res.getInt(1);
+                System.out.println(orderID);
             }
             res.close();
 
-            orderNum++;
+            orderID++;
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             ps = conn.prepareStatement(insertSql);
-            for(int[] tmp: commoditylist){
-                ps.setInt(1, orderNum);
+            for(OrderInformation tmp: commoditylist){
+                ps.setInt(1, orderID);
                 ps.setTimestamp(2, timestamp);
                 ps.setInt(3, clientID);
-                ps.setInt(4, tmp[2]);
-                ps.setString(5, "N");
-                ps.setInt(6, tmp[0]);
-                ps.setInt(7, tmp[1]);
+                ps.setDouble(4, tmp.getPrice());
+                ps.setInt(5, 0);
+                ps.setInt(6, tmp.getCommodityID());
+                ps.setInt(7, tmp.getCommodityNum());
 
                 ps.addBatch();
             }
@@ -75,8 +76,7 @@ public class DealService implements DealFunction {
     @Override
     public boolean refund(int orderID) {
         String qeurySql = "select 所属商户,下单客户,交易金额 " +
-                "from orderlist inner join commodity on orderlist.商品ID=commodity.商品ID" +
-                "where orderlist.商品ID=?";
+                "from orderlist inner join commodity on orderlist.商品ID=commodity.商品ID where 订单号=?";
         String updateSql = "update orderlist set 是否退货=? where 订单号=?";
         String merchantRefundSql = "update merchant set 销售总额=销售总额-? where 商户ID=?";
         String clientRefundSql = "update client set 消费总额=消费总额-? where 客户ID=?";
@@ -84,7 +84,7 @@ public class DealService implements DealFunction {
         try {
             conn.setAutoCommit(false);
             ps = conn.prepareStatement(updateSql);
-            ps.setString(1, "Y");
+            ps.setInt(1, 1);
             ps.setInt(2, orderID);
             ps.executeUpdate();
 

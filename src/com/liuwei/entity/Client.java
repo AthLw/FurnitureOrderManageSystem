@@ -1,5 +1,8 @@
 package com.liuwei.entity;
 
+import com.liuwei.business.ClientService;
+import com.liuwei.ui.ClientUI;
+
 /**
  * @ClassName Client
  * @Description save Client in mysql database

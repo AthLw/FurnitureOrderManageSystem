@@ -1,0 +1,14 @@
+create table if not exists orderlistBackup like orderlist;
+	
+delimiter //
+create trigger OrderlistInsertSync after insert on orderlist for each row
+begin
+	insert into orderlistBackup values(new.订单号, new.下单时间, new.下单客户, new.交易金额, new.是否退货, new.商品ID, new.商品数量);
+end;//
+
+create trigger OrderlistUpdateSync after update on orderlist for each row
+begin
+	delete from orderlistBackup where orderlistBackup.订单号 = new.订单号;
+	insert into orderlistBackup select * from orderlist where orderlist.订单号=new.订单号;
+end;//
+

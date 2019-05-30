@@ -73,4 +73,32 @@ public class Commodity {
                 ", price=" + price +
                 '}';
     }
+
+    public String[] toStringArray(){
+        String[] res = new String[5];
+        res[0] = String.valueOf(commodityID);
+        res[1] = String.valueOf(commodityName);
+        res[2] = String.valueOf(belongToMerchant);
+        res[3] = String.valueOf(description);
+        res[4] = String.valueOf(price);
+        return res;
+    }
+
+    public void setAttrib(int i, String value){
+        switch (i){
+            case 1:
+                this.setCommodityName(value);
+                break;
+            case 3:
+                this.setDescription(value);
+                break;
+            case 4:
+                this.setPrice(Double.valueOf(value));
+                break;
+            default:
+                System.out.println("Error! try to modify read-only data");
+                break;
+
+        }
+    }
 }
