@@ -13,13 +13,13 @@ import java.util.List;
 
 /**
  * @ClassName OrderService
- * @Description TODO
+ * @Description 订单服务类，负责订单的查询，统计
  * @Author AthLw
  * @Date 18:00 2019/5/26
  * @Version 1.0
  **/
 public class OrderService implements OrderFunction {
-    public static int ITEM_NUM_PER_PAGE = 20;
+    public static int ITEM_NUM_PER_PAGE = 50;
 
     private static Connection conn;
     private PreparedStatement ps;
@@ -60,8 +60,8 @@ public class OrderService implements OrderFunction {
 
     public boolean checkClient(){
         boolean flag = true;
-        String checkSql = "select 下单客户,消费总额,sum(交易金额) from orderlist,client" +
-                "where 下单客户=客户ID group by 下单客户";
+        String checkSql = "select 下单客户,消费总额,sum(交易金额) from orderlist,client " +
+                "where orderlist.下单客户=client.客户ID and 是否退货=0 group by 下单客户";
         try {
             ps = conn.prepareStatement(checkSql);
             ResultSet res = ps.executeQuery();
@@ -87,8 +87,9 @@ public class OrderService implements OrderFunction {
     public boolean checkMerchant(){
         boolean flag = true;
         String checkSql = "select 商户ID,销售总额,sum(交易金额) from " +
-                "(commodity inner join merchant on commodity.所属商户=merchant.商户ID)" +
-                "inner join orderlist on commodity.商品ID=orderlist.商品ID" +
+                "commodity,merchant,orderlist " +
+                "where commodity.所属商户=merchant.商户ID and commodity.商品ID=orderlist.商品ID " +
+                "and 是否退货=0 " +
                 "group by 商户ID";
         try {
             ps = conn.prepareStatement(checkSql);
@@ -113,7 +114,7 @@ public class OrderService implements OrderFunction {
     }
 
     @Override
-    public int statisticMerchant() {
+    public int[] statisticMerchant() {
         int res = 0;
         String querySql = "select a.所属商户,max(a.s) from" +
                 "(select 所属商户,sum(交易金额) as s from orderlist inner join commodity on orderlist.商品ID = commodity.商品ID " +
@@ -132,24 +133,25 @@ public class OrderService implements OrderFunction {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return res;
+        return statisticCommodityBelongTo(res);
     }
 
     @Override
-    public int statisticCommodity() {
-        //TODO
-        int res = 0;
-        String querySql = "select a.商品ID,max(a.s) from " +
-                "(select 商品ID,sum(交易金额) as s from orderlist " +
-                "where 下单时间 > DATE_SUB(curdate(),interval 1 month) " +
-                "group by 商品ID) as a";
+    public int[] statisticCommodityBelongTo(int mid) {
+        int[] res = null;
+        String querySql = "select a.id,a.s,所属商户 from " +
+                "(select orderlist.商品ID as id,sum(交易金额) as s,所属商户 from orderlist,commodity " +
+                "where 下单时间 > DATE_SUB(curdate(),interval 1 month) and orderlist.商品ID=commodity.商品ID and 所属商户=? " +
+                "group by orderlist.商品ID) as a order by a.s desc limit 1";
         try {
             ps = conn.prepareStatement(querySql);
+            ps.setInt(1, mid);
             ResultSet resultSet = ps.executeQuery();
             if(resultSet.next()){
                 int commodityid = resultSet.getInt(1);
                 double allmoney = resultSet.getDouble(2);
-                res = commodityid;
+                int resMid = resultSet.getInt(3);
+                res = new int[]{resMid, commodityid};
                 System.out.println("the commodity which has highest income is "+commodityid
                         + "\n income:  "+ allmoney);
             }

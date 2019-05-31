@@ -2,7 +2,7 @@ package com.liuwei.entity;
 
 /**
  * @ClassName Merchant
- * @Description TODO
+ * @Description save merchant in mysql database
  * @Author AthLw
  * @Date 2019/5/24 09:00
  * @Version 1.0

@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * @ClassName RegisterDialog
- * @Description TODO
+ * @Description 注册对话框，用于注册商户或客户
  * @Author AthLw
  * @Date 12:00 2019/5/30
  * @Version 1.0
@@ -27,11 +27,6 @@ public class RegisterDialog extends JDialog {
         JComponent component = userInfPane.add(name, value, true);
         componentList.add(component);
         return component;
-    }
-
-    public JComponent addButton(String name, ActionListener actionListener){
-        register = userInfPane.addButton(name, actionListener);
-        return register;
     }
 
     public RegisterDialog(Frame owner, boolean modal) {

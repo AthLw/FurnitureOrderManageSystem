@@ -1,10 +1,11 @@
 package com.liuwei.entity;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 
 /**
  * @ClassName Order
- * @Description TODO
+ * @Description save order in mysql database
  * @Author AthLw
  * @Date 2019/5/24 09:00
  * @Version 1.0
@@ -110,5 +111,24 @@ public class Order {
         res[5] = String.valueOf(commodityNum);
         res[6] = String.valueOf(isRefund);
         return res;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Order order = (Order) o;
+        return orderID == order.orderID &&
+                orderingClientID == order.orderingClientID &&
+                commodityID == order.commodityID &&
+                commodityNum == order.commodityNum &&
+                Double.compare(order.transactionCost, transactionCost) == 0 &&
+                isRefund == order.isRefund &&
+                Objects.equals(orderTime, order.orderTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(orderID, orderTime, orderingClientID, commodityID, commodityNum, transactionCost, isRefund);
     }
 }

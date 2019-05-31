@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * @ClassName UserInfPane
- * @Description TODO
+ * @Description 用于统一生成表示用户信息的面板，包括标签和值，可加入按钮
  * @Author AthLw
  * @Date 13:00 2019/5/29
  * @Version 1.0

@@ -6,6 +6,6 @@ import com.liuwei.entity.OrderInformation;
 import java.util.List;
 
 public interface DealFunction {
-    void bargain(int clientID, List<OrderInformation> commoditylist);
-    boolean refund(int orderID);
+    double bargain(int clientID, List<OrderInformation> commoditylist);
+    double refund(int orderID);
 }

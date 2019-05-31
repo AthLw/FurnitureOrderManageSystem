@@ -39,9 +39,13 @@ public class ClientCommodityDataLoader extends TableDataLoader {
         int rowcount = model.getRowCount();
 
         List<Commodity> list = clientService.queryCommodity();
-        for (Commodity commodity : list) {
-            model.insertRow(rowcount, commodity.toStringArray());
-            rowcount++;
+        if(rowcount != list.size()){
+            model.setNumRows(0);
+            rowcount = 0;
+            for (Commodity commodity : list) {
+                model.insertRow(rowcount, commodity.toStringArray());
+                rowcount++;
+            }
         }
 
         super.nextBatch();

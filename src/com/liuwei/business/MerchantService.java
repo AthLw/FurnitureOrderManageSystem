@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * @ClassName Merchant
- * @Description TODO
+ * @Description 商户服务类，负责商户功能
  * @Author AthLw
  * @Date 00:00 2019/5/25
  * @Version 1.0

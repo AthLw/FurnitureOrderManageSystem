@@ -8,6 +8,6 @@ public interface OrderFunction {
     List<Order> query(int startLoc);
     boolean checkMerchant();
     boolean checkClient();
-    int statisticMerchant();
-    int statisticCommodity();
+    int[] statisticMerchant();
+    int[] statisticCommodityBelongTo(int merchantID);
 }

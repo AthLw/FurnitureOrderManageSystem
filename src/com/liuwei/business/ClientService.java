@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * @ClassName Client
- * @Description TODO
+ * @Description 客户服务类，负责客户功能
  * @Author AthLw
  * @Date 00:00 2019/5/25
  * @Version 1.0
@@ -78,7 +78,6 @@ public class ClientService implements ClientFunction {
 
             int s = ps.executeUpdate();
             conn.commit();
-            //System.out.println(s + " rows affected");
             ps.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -170,7 +169,6 @@ public class ClientService implements ClientFunction {
                 tmp.setRefund(resultSet.getBoolean(5));
                 tmp.setCommodityID(resultSet.getInt(6));
                 tmp.setCommodityNum(resultSet.getInt(7));
-                System.out.println(tmp);
                 list.add(tmp);
             }
             resultSet.close();

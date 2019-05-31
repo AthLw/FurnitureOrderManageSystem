@@ -2,33 +2,28 @@ package com.liuwei.ui;
 
 import com.liuwei.business.ClientService;
 import com.liuwei.business.DealService;
-import com.liuwei.business.OrderService;
 import com.liuwei.entity.Client;
 import com.liuwei.entity.OrderInformation;
 import com.liuwei.ui.dataLoader.ClientCommodityDataLoader;
 import com.liuwei.ui.dataLoader.ClientOrderDataLoader;
-import com.liuwei.ui.dataLoader.OrderDataLoader;
-import com.mysql.cj.conf.BooleanPropertyDefinition;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.nio.ByteOrder;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @ClassName ClientUI
- * @Description TODO
+ * @Description 客户界面
  * @Author AthLw
  * @Date 19:00 2019/5/28
  * @Version 1.0
  **/
 public class ClientUI extends JFrame {
     private JPanel[][] jPanels;
-    private GridLayout gridLayout;
     private TableScrollPane commodityPane;
     private ClientCommodityDataLoader ccDataLoader;
     private TableScrollPane orderPane;
@@ -46,12 +41,12 @@ public class ClientUI extends JFrame {
     private Client client;
 
     public void setUserInfPane(){
-        client = clientService.login(this.clientID);
+        queryClient();
         userInfPane.add("用户ID：", String.valueOf(client.getClientID()), false);
         jname = (JTextField) userInfPane.add("用户名：", client.getClientName(), true);
         userInfPane.add("总消费金额：", client.getAllCost()+"", false);
         userInfPane.addButton("修改", e -> {
-            updateClient();
+            updateClientPane();
         });
         userInfPane.toPanel();
         userInfPane.setPreferredSize(new Dimension(200, 200));
@@ -61,13 +56,18 @@ public class ClientUI extends JFrame {
         String[][] tmp = new String[][]{};
         String[] names = new String[]{"商品号","商品名","所属商户","商品描述","商品价格"};
         DefaultTableModel tableModel = new DefaultTableModel(tmp, names);
-        JTable jTable = new JTable(tableModel);
+        JTable jTable = new JTable(tableModel){
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         this.commodityPane = new TableScrollPane(jTable);
         ccDataLoader = new ClientCommodityDataLoader(tableModel);
         this.commodityPane.setDataLoader(ccDataLoader);
 
-        this.commodityPane.setPreferredSize(new Dimension(400, 200));
-        this.commodityPane.getViewport().setViewSize(new Dimension(400, 200));
+        this.commodityPane.setPreferredSize(new Dimension(500, 200));
+        this.commodityPane.getViewport().setViewSize(new Dimension(500, 200));
     }
 
     public void setOrderPane(){
@@ -85,8 +85,8 @@ public class ClientUI extends JFrame {
         coDataLoader = new ClientOrderDataLoader(tableModel, this.clientID);
         this.orderPane.setDataLoader(coDataLoader);
 
-        orderPane.setPreferredSize(new Dimension(400, 200));
-        orderPane.getViewport().setViewSize(new Dimension(400, 200));
+        orderPane.setPreferredSize(new Dimension(500, 200));
+        orderPane.getViewport().setViewSize(new Dimension(500, 200));
     }
 
     public void setPanel(){
@@ -99,34 +99,51 @@ public class ClientUI extends JFrame {
 
         JPanel rightButtonPanel = new JPanel();
         JPanel rightPanel = new JPanel();
+        JPanel tipsPanel = new JPanel();
         rightPanel.setLayout(new GridLayout(2,0));
         rightPanel.add(inputList);
         rightButtonPanel.add(order);
         rightButtonPanel.add(refund);
-        rightPanel.add(rightButtonPanel);
+        JLabel tips1 = new JLabel("下单：商品以逗号隔开，格式为 商品ID-数量");
+        JLabel tips2 = new JLabel("退货：输入订单号即可，一次退一单");
+        tipsPanel.add(tips1);
+        tipsPanel.add(tips2);
+        JPanel rightUpPanel = new JPanel();
+        rightUpPanel.add(rightButtonPanel);
+        rightUpPanel.add(tipsPanel);
+        rightPanel.add(rightUpPanel);
         jPanels[0][1].add(rightPanel);
 
         jPanels[1][1].add(userInfPane);
-
-//        mainPanel.add(leftPanel, BorderLayout.WEST);
-//        mainPanel.add(rightPanel, BorderLayout.EAST);
     }
 
     public void updateClient(){
+        queryClient();
         client.setClientName(jname.getText());
         clientService.update(client);
+    }
+
+    public void queryClient(){
+        client = clientService.login(this.clientID);
+    }
+
+    public void updateClientPane(){
+        updateClient();
         userInfPane.setVisible(false);
-        this.remove(userInfPane);
+        jPanels[1][1].remove(userInfPane);
         userInfPane = new UserInfPane();
         setUserInfPane();
-        this.add(userInfPane);
+        jPanels[1][1].add(userInfPane);
         userInfPane.setVisible(true);
     }
 
     public void updateOrder(){
         List<OrderInformation> list = this.toList();
+        for(OrderInformation orderInformation : list)
+            System.out.println(orderInformation);
         dealService.bargain(this.clientID, list);
         coDataLoader.nextBatch();
+        updateClientPane();
         orderPane.setVisible(true);
     }
 
@@ -134,13 +151,12 @@ public class ClientUI extends JFrame {
         int orderid = this.getOrderID();
         dealService.refund(orderid);
         coDataLoader.nextBatch();
-
+        updateClientPane();
     }
 
     public ClientUI(int clientID){
         this.clientID = clientID;
-        gridLayout = new GridLayout(2, 2, 10,10);
-        this.setLayout(gridLayout);
+        this.setLayout(new GridLayout(2, 2, 10,10));
         jPanels = new JPanel[2][2];
         for(int i =0 ; i< 2; i++){
             for(int j = 0; j <2; j++){
@@ -153,10 +169,12 @@ public class ClientUI extends JFrame {
         order = new JButton("下单");
         order.addActionListener(e -> {
             updateOrder();
+            inputList.setText("");
         });
         refund = new JButton("退货");
         refund.addActionListener(e -> {
             refund();
+            inputList.setText("");
         });
         inputList = new JTextField(10);
         inputList.setPreferredSize(new Dimension(300, 100));
@@ -170,7 +188,12 @@ public class ClientUI extends JFrame {
         this.setBounds(0, 0, 1600, 1200);
         this.pack();
         this.setVisible(true);
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                new mainWindow();
+            }
+        });
     }
 
     public int getOrderID(){
@@ -186,11 +209,9 @@ public class ClientUI extends JFrame {
             String[] item = tmp.split("-");
             int commodityID = Integer.valueOf(item[0]);
             int commodityNum = Integer.valueOf(item[1]);
-            System.out.println("cid:  "+commodityID+ "   cNum: "+commodityNum);
             double commodityPrice = clientService.queryCertainCommodity(commodityID).getPrice();
-            OrderInformation orderInformation = new OrderInformation(commodityID, commodityNum, commodityPrice);
+            OrderInformation orderInformation = new OrderInformation(commodityID, commodityNum, commodityNum*commodityPrice);
             list.add(orderInformation);
-            System.out.println(orderInformation);
         }
         return list;
     }

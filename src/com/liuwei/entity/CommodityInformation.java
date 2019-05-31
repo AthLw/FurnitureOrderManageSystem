@@ -2,7 +2,7 @@ package com.liuwei.entity;
 
 /**
  * @ClassName CommodityInformation
- * @Description TODO
+ * @Description 记录新建商品时需要的信息
  * @Author AthLw
  * @Date 09:00 2019/5/30
  * @Version 1.0

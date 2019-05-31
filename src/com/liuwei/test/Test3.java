@@ -1,5 +1,7 @@
 package com.liuwei.test;
 
+import com.liuwei.ui.MerchantUI;
+
 /**
  * @ClassName Test3
  * @Description TODO
@@ -8,4 +10,8 @@ package com.liuwei.test;
  * @Version 1.0
  **/
 public class Test3 {
+    public static void main(String[] args) {
+        new MerchantUI(1);
+
+    }
 }

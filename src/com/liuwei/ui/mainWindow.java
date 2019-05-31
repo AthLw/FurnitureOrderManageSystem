@@ -3,6 +3,8 @@ package com.liuwei.ui;
 import com.liuwei.business.ClientService;
 import com.liuwei.business.MerchantService;
 import com.liuwei.business.OrderService;
+import com.liuwei.entity.Commodity;
+import com.liuwei.entity.Merchant;
 import com.liuwei.entity.Order;
 import com.liuwei.ui.dataLoader.OrderDataLoader;
 
@@ -10,6 +12,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.PipedReader;
+import java.time.chrono.JapaneseChronology;
 import java.util.List;
 
 /**
@@ -28,6 +31,9 @@ public class mainWindow extends JFrame{
     private JTextField ID;
     private JButton login;
     private JButton register;
+    private JButton checkClient;
+    private JButton checkMerchant;
+    private JButton statisticMonthly;
     private JRadioButton[] identity;
     private ButtonGroup buttonGroup;
     private OrderDataLoader orderDataLoader;
@@ -39,7 +45,7 @@ public class mainWindow extends JFrame{
 
     public void setTableScrollPane() {
         String[][] tmp = new String[][]{};
-        String[] names = new String[]{"订单号","下单时间","下单客户","交易金额","是否退货","商品ID","商品数量"};
+        String[] names = new String[]{"订单号","下单时间","下单客户","交易金额","商品ID","商品数量","是否退货"};
         DefaultTableModel tableModel = new DefaultTableModel(tmp, names);
         JTable jTable = new JTable(tableModel){
             @Override
@@ -57,7 +63,7 @@ public class mainWindow extends JFrame{
 
     public void setLoginUIP(){
          ID = (JTextField) loginUIP.add("ID: ", "", true);
-         ID.setPreferredSize(new Dimension(70, 20));
+         ID.setPreferredSize(new Dimension(70, 30));
          loginUIP.addParallelButton("登录", "注册",
                  e->{
                     login();
@@ -65,7 +71,28 @@ public class mainWindow extends JFrame{
                  e->{
                     register();
          });
-         loginUIP.toPanel();
+         loginUIP.addParallelButton("验证所有商户","验证所有客户",
+                 e -> {
+                boolean res =  orderService.checkMerchant();
+                JOptionPane.showConfirmDialog(null, "验证所有商户的结果是："+res,
+                        "验证结果", JOptionPane.YES_OPTION);
+         }, e -> {
+                     boolean res =  orderService.checkClient();
+                     JOptionPane.showConfirmDialog(null, "验证所有商户的结果是："+res,
+                             "验证结果", JOptionPane.YES_OPTION);
+         });
+         loginUIP.addButton("统计近一个月", e -> {
+            int[] res = orderService.statisticMerchant();
+             Merchant tmpMerchant = merchantService.login(res[0]);
+             Commodity tmpCommodity = clientService.queryCertainCommodity(res[1]);
+             JOptionPane.showConfirmDialog(null, "近一月收入最高的商户是: \n"+
+                             "商户ID：" + tmpMerchant.getMerchantID() + "\n" +
+                             "商户名：" + tmpMerchant.getMerchantName() + "\n" +
+                             "商户地址：" + tmpMerchant.getMerchantLocation() + "\n"
+                             +"这个月它卖的最好的商品是："+tmpCommodity.getCommodityName(),
+                     "验证结果", JOptionPane.YES_OPTION);
+         });
+        loginUIP.toPanel();
     }
 
     public void login(){
@@ -97,18 +124,15 @@ public class mainWindow extends JFrame{
         }
     }
 
-    public void closeDialog(){
-        registerDialog.dispose();
-    }
     public void setPanel(){
         rightPanel.setSize(1200, 1000);
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
-        leftPanel.add(loginUIP);
         JPanel jPanel = new JPanel();
         for(int i = 0; i < identity.length; i++){
             jPanel.add(identity[i]);
         }
         leftPanel.add(jPanel);
+        leftPanel.add(loginUIP);
         leftPanel.setSize(400,400);
         rightPanel.add(tableScrollPane);
         this.mainPanel.add(leftPanel, BorderLayout.WEST);
@@ -133,8 +157,12 @@ public class mainWindow extends JFrame{
         this.leftPanel = new JPanel();
         this.rightPanel = new JPanel();
         this.loginUIP = new UserInfPane();
+        this.orderService = new OrderService();
         this.clientService = new ClientService();
         this.merchantService = new MerchantService();
+        this.statisticMonthly = new JButton("统计近一月");
+        this.checkClient = new JButton("验证所有客户");
+        this.checkMerchant = new JButton("验证所有商户");
 
         setRadioButton();
         setLoginUIP();
